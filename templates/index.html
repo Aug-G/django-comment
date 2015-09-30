@@ -1,0 +1,22 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>demo</title>
+
+    <script src="{{ STATIC_URL }}js/config.js"></script>
+    <script data-main="{{ STATIC_URL }}js/embed.js" src="{{ STATIC_URL }}js/components/requirejs/require.js"></script>
+</head>
+<body>
+<div id="page" style="text-align:center;">
+    <div id="wrapper" style="width: 900px; text-align: left; margin-left: auto; margin-right: auto;">
+        <h2><a href="index.html">Demo</a></h2>
+                    <script data-isso="/" src="{{ STATIC_URL }}js/embed.js"></script>
+        			<section id="isso-thread" data-title="Isso Test"></section>
+    </div>
+</div>
+<div id="conn_status">Not Connected</div>
+   <div id="placeholder" style="width:600px;height:300px;"></div>
+</body>
+</html>
