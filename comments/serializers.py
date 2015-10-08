@@ -2,7 +2,7 @@ import datetime
 from rest_framework import serializers, exceptions
 from .models import Comment
 from utils import pbkdf2_hash
-
+from django.core.cache import cache
 
 class CommentSerializer(serializers.ModelSerializer):
 
@@ -12,16 +12,12 @@ class CommentSerializer(serializers.ModelSerializer):
     thread = serializers.PrimaryKeyRelatedField(read_only=True)
 
     def get_hash(self, instance):
-        request = self.context.get('request')
-        if request is None:
-            raise  exceptions.NotFound('Request not found')
         key = instance.email or instance.remote_addr
-        val = request.session.get(key)
+        val = cache.get(key)
         if val is None:
             val = pbkdf2_hash(key)
-            request.session[key] = val
+            cache.set(key, val)
         return val
-
 
     class Meta:
         model = Comment

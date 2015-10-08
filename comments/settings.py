@@ -170,6 +170,8 @@ WEBSOCKET_URL = '/ws/'
 
 WS4REDIS_CONNECTION = REDIS_SETTING
 WS4REDIS_EXPIRE = 300
+WS4REDIS_SUBSCRIBER = 'websocket.subscriber.CustomerSubscriber'
+
 
 CACHES = {
     'default':{

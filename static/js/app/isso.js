@@ -1,7 +1,7 @@
 /* Isso – Ich schrei sonst!
  */
-define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n", "app/lib", "app/globals"],
-    function($, utils, config, api, jade, i18n, lib, globals) {
+define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n", "app/lib", "app/globals", "app/websocket"],
+    function($, utils, config, api, jade, i18n, lib, globals, websocket) {
 
     "use strict";
 
@@ -50,7 +50,7 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
                 $(".textarea", el).innerHTML = "";
                 $(".textarea", el).blur();
                 insert(comment, true);
-
+                websocket.send_message('create', comment);
                 if (parent !== null) {
                     el.onsuccess();
                 }
@@ -124,8 +124,6 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
 
         if (comment.parent === null) {
             entrypoint = $("#isso-root");
-
-            console.log(entrypoint);
         } else {
             entrypoint = $("#isso-" + comment.parent + " > .text-wrapper > .isso-follow-up");
         }
@@ -225,6 +223,7 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
                         api.modify(comment.id, {"text": utils.text(textarea.innerHTML)}).then(function(rv) {
                             text.innerHTML = rv.text;
                             comment.text = rv.text;
+                            websocket.send_message('modify', {'comment_id': comment.id, 'body': rv.text})
                         });
                     }
                 } else {
@@ -267,6 +266,8 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
                         $("a.delete", footer).remove();
                     }
                     del.textContent = i18n.translate("comment-delete");
+
+                    websocket.send_message('remove', {'comment_id':comment.id, 'body': rv})
                 });
             }
         );
@@ -315,8 +316,33 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
 
     };
 
+    var remove = function(data){
+        var el = $('#isso-'+data.comment_id);
+        if(data.body){
+            el.remove();
+        }else{
+            var footer = $("#isso-" + data.comment_id + " > .text-wrapper > .isso-comment-footer"),
+            header = $("#isso-" + data.comment_id + " > .text-wrapper > .isso-comment-header"),
+            text   = $("#isso-" + data.comment_id + " > .text-wrapper > .text");
+
+            $("span.note", header).textContent = i18n.translate("comment-deleted");
+            text.innerHTML = "<p>&nbsp;</p>";
+            $("a.edit", footer).remove();
+            $("a.delete", footer).remove();
+        }
+    };
+
+    var modify = function(data){
+        var text = $("#isso-" + data.comment_id + " > .text-wrapper > .text");
+        if(text){
+            text.innerHTML = data.body;
+        }
+    };
+
     return {
         insert: insert,
+        remove: remove,
+        modify: modify,
         insert_loader: insert_loader,
         Postbox: Postbox
     };
