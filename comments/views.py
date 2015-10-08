@@ -2,7 +2,7 @@ import json
 
 from django.db.models import Count
 from rest_framework import viewsets, status, exceptions
-from rest_framework.decorators import list_route
+from rest_framework.decorators import list_route, detail_route
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
 
@@ -41,6 +41,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         return response
 
     def perform_create(self, serializer):
+        serializer.validated_data['voters'] = utils.Bloomfilter(iterable=[serializer.validated_data.get('remote_addr')]).array
         serializer.validated_data['text'] = dfa_filter.filter(serializer.validated_data.get('text'))
         serializer.validated_data['thread'] = self.thread
         serializer.save()
@@ -120,3 +121,13 @@ class CommentViewSet(viewsets.ModelViewSet):
         :return:
         """
         return Response(self.get_thread().pk)
+
+    @detail_route(methods=['post'])
+    def like(self, request, *args, **kwargs):
+        comment = self.get_object()
+        return Response(comment.vote(True, utils.anonymize(request.META.get('REMOTE_ADDR'))))
+
+    @detail_route(methods=['post'])
+    def dislike(self, request, *args, **kwargs):
+        comment = self.get_object()
+        return Response(comment.vote(False, utils.anonymize(request.META.get('REMOTE_ADDR'))))

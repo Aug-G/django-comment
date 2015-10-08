@@ -1,6 +1,7 @@
 #coding=utf-8
 from django.db import models
 import time
+from utils import Bloomfilter
 
 
 class Thread(models.Model):
@@ -21,7 +22,7 @@ class Comment(models.Model):
     website = models.CharField('个人网站', max_length=64, null=True, blank=True)
     likes = models.IntegerField('赞成', default=0)
     dislikes = models.IntegerField('反对', default=0)
-
+    voters = models.BinaryField('评论人', null=True, blank=True)
 
     def get_created_timestamp(self):
         try:
@@ -37,3 +38,18 @@ class Comment(models.Model):
         except AttributeError:
             return None
 
+    def vote(self, up_vote, remote_addr):
+
+        if self.likes + self.dislikes >= 142:
+            return {'likes': self.likes, 'dislikes': self.dislikes}
+        bf = Bloomfilter(bytearray(self.voters), self.likes+self.dislikes)
+        if remote_addr in bf:
+            return {'likes': self.likes, 'dislikes': self.dislikes}
+        bf.add(remote_addr)
+        if up_vote:
+            self.likes += 1
+        else:
+            self.dislikes += 1
+        self.voters = buffer(bf.array)
+        self.save()
+        return {'likes': self.likes, 'dislikes': self.dislikes}

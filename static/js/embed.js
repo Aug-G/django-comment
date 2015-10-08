@@ -36,6 +36,7 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
         api.thread($("#isso-thread").getAttribute("data-isso-id")).then(function(rv){
            websocket.init(rv, receiver_message);
         });
+
         api.fetch($("#isso-thread").getAttribute("data-isso-id"),
             config["max-comments-top"],
             config["max-comments-nested"]).then(
