@@ -1,6 +1,8 @@
 # Django settings for comments project.
 import os
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -192,3 +194,6 @@ SESSION_REDIS_HOST = REDIS_SETTING.get('host')
 SESSION_REDIS_PORT = REDIS_SETTING.get('port')
 SESSION_REDIS_DB = 1
 SESSION_REDIS_PASSWORD = REDIS_SETTING.get('password')
+
+
+KEYWORD_FILE_PATH = os.path.join(os.path.dirname(__file__), os.path.pardir, 'keywords').replace('\\','/')

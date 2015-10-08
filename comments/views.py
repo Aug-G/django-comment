@@ -1,16 +1,18 @@
+import json
+
 from django.db.models import Count
 from rest_framework import viewsets, status, exceptions
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
+from rest_framework.renderers import JSONRenderer
+
 from .models import Comment, Thread
 from .serializers import CommentSerializer
 import utils
-from utils.hash import pbkdf2_hash, sha1
+from utils.hash import sha1
 from ws4redis.publisher import RedisPublisher
 from ws4redis.redis_store import RedisMessage
-from django.core.cache import cache
-from rest_framework.renderers import JSONRenderer
-import json
+from utils.textfilter import dfa_filter
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -39,7 +41,12 @@ class CommentViewSet(viewsets.ModelViewSet):
         return response
 
     def perform_create(self, serializer):
+        serializer.validated_data['text'] = dfa_filter.filter(serializer.validated_data.get('text'))
         serializer.validated_data['thread'] = self.thread
+        serializer.save()
+
+    def perform_update(self, serializer):
+        serializer.validated_data['text'] = dfa_filter.filter(serializer.validated_data.get('text'))
         serializer.save()
 
     def list(self, request, *args, **kwargs):
