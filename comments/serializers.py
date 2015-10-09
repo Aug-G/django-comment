@@ -1,7 +1,7 @@
 import datetime
 from rest_framework import serializers, exceptions
 from .models import Comment
-from utils import pbkdf2_hash
+from utils import pbkdf2_hash, markdown
 from django.core.cache import cache
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -20,6 +20,13 @@ class CommentSerializer(serializers.ModelSerializer):
             val = pbkdf2_hash(key)
             cache.set(key, val)
         return val
+
+    def to_representation(self, instance):
+        ret = super(CommentSerializer, self).to_representation(instance)
+        request = self.context.get('request')
+        if request.GET.get('plain', '0') == '0':
+            ret['text'] = markdown.convert(ret['text'])
+        return  ret
 
     class Meta:
         model = Comment

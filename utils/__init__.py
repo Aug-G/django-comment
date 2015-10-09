@@ -87,3 +87,6 @@ class Bloomfilter:
 
     def __len__(self):
         return self.elements
+
+from markdown2 import Markdown
+markdown = Markdown()
