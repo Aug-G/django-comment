@@ -32,4 +32,3 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ('id', 'parent', 'created', 'modified', 'mode', 'text', 'thread', 'hash', 'author', 'email', 'website',
                   'likes', 'dislikes', 'remote_addr', 'voters')
-

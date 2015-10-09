@@ -120,9 +120,13 @@ class CommentViewSet(viewsets.ModelViewSet):
         response.delete_cookie('isso-%s' % id)
         return response
 
-    @list_route(methods=['post'])
+    @list_route(methods=['get', 'post'])
     def count(self, request, *args, **kwargs):
-        return Response(self.get_queryset().filter(thread__uri=request.GET.get('uri')).count())
+        if request.method == 'GET':
+            counts = self.get_queryset().filter(thread__uri=request.GET.get('uri')).count()
+        else:
+            counts = [self.get_queryset().filter(thread__uri=uri).count() for uri in request.data]
+        return Response(counts)
 
     @list_route()
     def thread(self, request, *args, **kwargs):
