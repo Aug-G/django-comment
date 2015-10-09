@@ -5,6 +5,7 @@ from rest_framework import viewsets, status, exceptions
 from rest_framework.decorators import list_route, detail_route
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
+import time
 
 from .models import Comment, Thread
 from .serializers import CommentSerializer
@@ -19,6 +20,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     renderer_classes = (JSONRenderer, )
+
 
     def get_thread(self):
         uri = self.request.GET.get('uri')
@@ -53,17 +55,28 @@ class CommentViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         uri = request.GET.get('uri')
         root_id = request.GET.get('parent')
-        # nested_limit = request.GET.get('nested_limit', 0)
-
+        nested_limit = request.GET.get('nested_limit', 0)
+        after = request.GET.get('after', 0)
         queryset = self.get_queryset().filter(thread__uri=uri)
+        limit  = request.GET.get('limit', 0)
+        if after:
+            after = time.localtime(float(after)+1)
+            queryset = queryset.filter(created__gt=time.strftime("%Y-%m-%d %H:%M:%S", after))
 
         if root_id is not None:
             root_list = queryset.filter(parent=root_id)
         else:
             root_list = queryset.filter(parent__isnull=True)
 
+        if limit:
+            root_list = root_list[:limit]
+
         parent_count = queryset.values('parent').annotate(total=Count('parent'))
         reply_counts = {item['parent']: item['total'] for item in parent_count}
+        if root_id is None:
+            reply_counts[root_id] = queryset.filter(parent__isnull=True).count()
+        else:
+            root_id = int(root_id)
 
         rv = {
             'id': root_id,
@@ -76,7 +89,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             for comment in rv['replies']:
                 if comment['id'] in reply_counts:
                     comment['total_replies'] = reply_counts.get(comment['id'], 0)
-                    replies = self.get_serializer(queryset.filter(parent=comment['id']), many=True).data
+                    replies = self.get_serializer(queryset.filter(parent=comment['id'])[:nested_limit], many=True).data
                 else:
                     comment['total_replies'] = 0
                     replies = []
