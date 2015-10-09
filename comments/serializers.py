@@ -10,8 +10,8 @@ class CommentSerializer(serializers.ModelSerializer):
     modified = serializers.FloatField(source='get_modified_timestamp', allow_null=True, read_only=True)
     hash = serializers.SerializerMethodField(read_only=True)
     thread = serializers.PrimaryKeyRelatedField(read_only=True)
-    remote_addr = serializers.CharField(write_only=True)
-    voters = serializers.CharField(write_only=True)
+    remote_addr = serializers.CharField(write_only=True, required=False)
+    voters = serializers.CharField(write_only=True, required=False)
 
     def get_hash(self, instance):
         key = instance.email or instance.remote_addr

@@ -71,7 +71,6 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
         );
 
         function receiver_message(message){
-            console.log(init_complete);
             if(!init_complete) {
                 init_complete = true;
                 return;
