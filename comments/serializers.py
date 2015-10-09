@@ -10,6 +10,8 @@ class CommentSerializer(serializers.ModelSerializer):
     modified = serializers.FloatField(source='get_modified_timestamp', allow_null=True, read_only=True)
     hash = serializers.SerializerMethodField(read_only=True)
     thread = serializers.PrimaryKeyRelatedField(read_only=True)
+    remote_addr = serializers.CharField(write_only=True)
+    voters = serializers.CharField(write_only=True)
 
     def get_hash(self, instance):
         key = instance.email or instance.remote_addr
@@ -22,5 +24,5 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'parent', 'created', 'modified', 'mode', 'text', 'thread', 'hash', 'author', 'email', 'website',
-                  'likes', 'dislikes')
+                  'likes', 'dislikes', 'remote_addr', 'voters')
 

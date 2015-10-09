@@ -31,6 +31,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         request.data['remote_addr'] = utils.anonymize(request.META.get('REMOTE_ADDR'))
+        request.data['voters'] = utils.Bloomfilter(iterable=[request.META.get('REMOTE_ADDR')]).array
         self.thread = self.get_thread()
         response = super(CommentViewSet, self).create(request, *args, **kwargs)
         response.set_cookie(str(response.data['id']), sha1(response.data['text']))
@@ -41,7 +42,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         return response
 
     def perform_create(self, serializer):
-        serializer.validated_data['voters'] = utils.Bloomfilter(iterable=[serializer.validated_data.get('remote_addr')]).array
         serializer.validated_data['text'] = dfa_filter.filter(serializer.validated_data.get('text'))
         serializer.validated_data['thread'] = self.thread
         serializer.save()
