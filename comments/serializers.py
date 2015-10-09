@@ -11,7 +11,7 @@ class CommentSerializer(serializers.ModelSerializer):
     hash = serializers.SerializerMethodField(read_only=True)
     thread = serializers.PrimaryKeyRelatedField(read_only=True)
     remote_addr = serializers.CharField(write_only=True, required=False)
-    voters = serializers.CharField(write_only=True, required=False)
+    voters = serializers.HiddenField(default="")
 
     def get_hash(self, instance):
         key = instance.email or instance.remote_addr
@@ -26,7 +26,7 @@ class CommentSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request.GET.get('plain', '0') == '0':
             ret['text'] = markdown.convert(ret['text'])
-        return  ret
+        return ret
 
     class Meta:
         model = Comment
