@@ -8,6 +8,10 @@ class Thread(models.Model):
     uri = models.CharField('URI', max_length=256)
     title = models.CharField('标题', max_length=64)
 
+    class Meta:
+        verbose_name = '站点'
+        verbose_name_plural = "站点"
+
 
 class Comment(models.Model):
     thread = models.ForeignKey(Thread, verbose_name='Thread')
@@ -53,3 +57,8 @@ class Comment(models.Model):
         self.voters = buffer(bf.array)
         self.save()
         return {'likes': self.likes, 'dislikes': self.dislikes}
+
+
+    class Meta:
+        verbose_name = '评论'
+        verbose_name_plural = '评论'

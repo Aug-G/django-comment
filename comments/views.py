@@ -1,7 +1,7 @@
 import json
 
 from django.db.models import Count
-from rest_framework import viewsets, status, exceptions
+from rest_framework import viewsets, status, exceptions, authentication
 from rest_framework.decorators import list_route, detail_route
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
@@ -21,7 +21,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     renderer_classes = (JSONRenderer, )
-
+    authentication_classes = (authentication.BasicAuthentication, )
 
     def get_thread(self):
         uri = self.request.GET.get('uri')
