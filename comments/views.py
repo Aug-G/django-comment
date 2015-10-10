@@ -45,12 +45,12 @@ class CommentViewSet(viewsets.ModelViewSet):
         return response
 
     def perform_create(self, serializer):
-        serializer.validated_data['text'] = dfa_filter.filter(serializer.validated_data.get('text'))
+        serializer.validated_data['text'] = dfa_filter.filter(serializer.validated_data.get('text'), '')
         serializer.validated_data['thread'] = self.thread
         serializer.save()
 
     def perform_update(self, serializer):
-        serializer.validated_data['text'] = dfa_filter.filter(serializer.validated_data.get('text'))
+        serializer.validated_data['text'] = dfa_filter.filter(serializer.validated_data.get('text'), '')
         serializer.save()
 
     def list(self, request, *args, **kwargs):

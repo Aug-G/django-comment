@@ -9,15 +9,15 @@ class Thread(models.Model):
     title = models.CharField('标题', max_length=64)
 
     class Meta:
-        verbose_name = '站点'
-        verbose_name_plural = "站点"
+        verbose_name = '位置'
+        verbose_name_plural = "位置"
 
 
 class Comment(models.Model):
-    thread = models.ForeignKey(Thread, verbose_name='Thread')
-    parent = models.ForeignKey('self', verbose_name='Parent', null=True)
-    created = models.DateTimeField('Created', auto_now_add=True)
-    modified = models.DateTimeField('Modified', auto_now=True)
+    thread = models.ForeignKey(Thread, verbose_name='位置')
+    parent = models.ForeignKey('self', verbose_name='主问题', null=True)
+    created = models.DateTimeField('创建时间', auto_now_add=True)
+    modified = models.DateTimeField('修改时间', auto_now=True)
     mode = models.IntegerField('Mode', default=1, choices=((1, 'accepted'), (2, 'queue'), (3, 'deleted')))
     remote_addr = models.CharField('IP', max_length=32, null=True, blank=True )
     text = models.CharField('评论内容', max_length=256)
