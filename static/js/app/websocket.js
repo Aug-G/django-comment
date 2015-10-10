@@ -5,8 +5,8 @@
 define(function () {
 
     var ws;
-    var init = function(thread_id, onmessage){
-        ws = new WebSocket("ws://127.0.0.1:8000/ws/thread-"+thread_id+"?subscribe-broadcast&publish-broadcast");
+    var init = function(url, onmessage){
+        ws = new WebSocket(url + "?subscribe-broadcast&publish-broadcast");
 
         // What do we do when we get a message?
         ws.onmessage = function (response) {

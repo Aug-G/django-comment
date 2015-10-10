@@ -14,6 +14,7 @@ from utils.hash import sha1
 from ws4redis.publisher import RedisPublisher
 from ws4redis.redis_store import RedisMessage
 from utils.textfilter import dfa_filter
+from django.conf import settings
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -131,13 +132,16 @@ class CommentViewSet(viewsets.ModelViewSet):
     @list_route()
     def thread(self, request, *args, **kwargs):
         """
-        Get thread id
+        Get thread websocket url
         :param request:
         :param args:
         :param kwargs:
         :return:
         """
-        return Response(self.get_thread().pk)
+        thread = self.get_thread()
+        protocol = request.is_secure() and 'wss://' or 'ws://'
+        url = protocol + request.get_host() + settings.WEBSOCKET_URL + 'thread-%i' % thread.id
+        return Response(url)
 
     @detail_route(methods=['post'])
     def like(self, request, *args, **kwargs):
