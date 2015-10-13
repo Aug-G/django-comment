@@ -7,7 +7,7 @@ server {
 
     location / {
         include uwsgi_params;
-        uwsgi_pass unix:/tmp/comment_service.socket;
+        uwsgi_pass unix:/tmp/comments_service.socket;
     }
 
     location /ws/ {
