@@ -156,11 +156,11 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
             var votes = function (value) {
                 var span = $("span.votes", footer);
                 if (span === null) {
-                    if (value !== 0) {
+                    if (value > 0) {
                         footer.prepend($.new("span.votes", value));
                     }
                 } else {
-                    if (value === 0) {
+                    if (value <= 0) {
                         span.remove();
                     } else {
                         span.textContent = value;
