@@ -35,18 +35,14 @@ class CommentViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         request.data['remote_addr'] = utils.anonymize(request.META.get('REMOTE_ADDR'))
         request.data['voters'] = utils.Bloomfilter(iterable=[request.META.get('REMOTE_ADDR')]).array
-        self.thread = self.get_thread()
         response = super(CommentViewSet, self).create(request, *args, **kwargs)
         response.set_cookie(str(response.data['id']), sha1(response.data['text']))
         response.set_cookie('isso-%i' % response.data['id'], sha1(response.data['text']))
-
-        message = RedisMessage(json.dumps(response.data))
-        RedisPublisher(facility='thread-%i' % self.thread.pk, broadcast=True).publish_message(message)
         return response
 
     def perform_create(self, serializer):
         serializer.validated_data['text'] = dfa_filter.filter(serializer.validated_data.get('text'), '')
-        serializer.validated_data['thread'] = self.thread
+        serializer.validated_data['thread'] = self.get_thread()
         serializer.save()
 
     def perform_update(self, serializer):
@@ -90,7 +86,11 @@ class CommentViewSet(viewsets.ModelViewSet):
             for comment in rv['replies']:
                 if comment['id'] in reply_counts:
                     comment['total_replies'] = reply_counts.get(comment['id'], 0)
-                    replies = self.get_serializer(queryset.filter(parent=comment['id'])[:nested_limit], many=True).data
+                    if nested_limit:
+                        replies = queryset.filter(parent=comment['id'])[:nested_limit]
+                    else:
+                        replies = queryset.filter(parent=comment['id'])
+                    replies = self.get_serializer(replies, many=True).data
                 else:
                     comment['total_replies'] = 0
                     replies = []
@@ -103,7 +103,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         id = request.COOKIES.get(str(self.kwargs.get('pk')), None)
         if id is None:
-            raise  exceptions.NotAuthenticated
+            raise exceptions.NotAuthenticated
         instance = self.get_object()
 
         if self.get_queryset().filter(parent=instance.id).exists():
