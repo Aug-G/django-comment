@@ -1,4 +1,3 @@
-
 #**通用评论系统部署文档**
 ---
 
@@ -29,40 +28,44 @@ comments/
 │    ├──   js/ # 前端JS
 │    │     ├──  embed.min.js
 ├──  templates/ 
-├──  utils/ # 工具类
-  
+├──  utils/ # 工具类  
 ```
  
 ##**2.系统安装**
 
-**安装redis, nginx**
+**安装redis, nginx及其它依赖 **
+
 ```
 # ubuntu
-sudo apt-get install redis
+sudo apt-get install redis-server
 sudo apt-get install nginx
+sudo apt-get install python-dev libxml2-dev libxslt-dev libssl-dev
 
 # 拷贝项目内comments_nginx 文件至nginx配置文件目录
 sudo cp -R comments_nginx /etc/nginx/sites-available/
 # 映射文件
 cd /etc/nginx/sites-enabled/
-sudo ln -s /etc/nginx/sites-available/sites-available/comments_nginx comments_nginx
+sudo ln -s /etc/nginx/sites-available/comments_nginx comments_nginx
 ```
 
 **安装python依赖**
+
 ```
-pip install -r requirements.txt
+sudo pip install -r requirements.txt
 ```
 
 **拷贝文件**
+
 ```
 # 拷贝项目
 sudo cp -R ./comments/ /var/www/comments
-# 修改权限
-sudo chown -R www-data:www-data /var/www/comments
 ```
 
 **配置redis**
+
 ```python
+# 修改 comments/settings.py
+ 
 REDIS_SETTING = {
     'host': '127.0.0.1',
     'port': 6379,
@@ -72,20 +75,34 @@ REDIS_SETTING = {
 ```
 
 **初始化数据库**
+
 ```
 python manage.py makemigrations
 python manage.py migrate
 ```
 
 **启动服务**
+
 ```
+# 修改目录权限
+sudo chown -R www-data:www-data /var/www/comments
+# 启动uWSGI
 sudo -u www-data uwsgi --ini uwsgi.ini:runserver
 sudo -u www-data uwsgi --ini uwsgi.ini:wsserver
 ```
 
 **完成**
+
 ```
 # 重启nginx服务
 sudo service nginx restart
 # 访问 http://localhost/
+```
+
+**修改代码后**
+
+```
+# 重载uWSGI服务
+sudo -u www-data uwsgi --reload /tmp/comments.pid 
+sudo -u www-data uwsgi --reload /tmp/comments_websocket.pid 
 ```
