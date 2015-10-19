@@ -2,16 +2,15 @@
  * Created by guohui on 15-9-29.
  */
 
-define(["app/api", "app/isso"], function (api, isso) {
+define(function () {
 
-    return function (thread_id) {
-        var ws = new WebSocket("ws://127.0.0.1:8000/ws/thread-"+thread_id+"?subscribe-broadcast");
+    var ws;
+    var init = function(url, onmessage){
+        ws = new WebSocket(url + "?subscribe-broadcast&publish-broadcast");
 
         // What do we do when we get a message?
         ws.onmessage = function (response) {
-            console.log(response.data);
-
-            isso.insert(JSON.parse(response.data), false);
+            return onmessage(JSON.parse(response.data));
         };
         // Just update our conn_status field with the connection status
         ws.onopen = function (evt) {
@@ -23,8 +22,18 @@ define(["app/api", "app/isso"], function (api, isso) {
         ws.onclose = function (evt) {
             console.log('Closed!')
         };
+    };
 
-    }
 
+    var send_message = function(type, data){
+        message = {'type': type, 'data': data};
+        if(!ws) return;
+        ws.send(JSON.stringify(message));
+    };
+
+    return {
+        init:init,
+        send_message:send_message
+    };
 
 });

@@ -13,7 +13,6 @@ define(["app/i18n"], function(i18n) {
     };
 
     var ago = function(localTime, date) {
-
         var secs = ((localTime.getTime() - date.getTime()) / 1000);
 
         if (isNaN(secs) || secs < 0 ) {

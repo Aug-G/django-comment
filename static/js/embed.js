@@ -14,6 +14,7 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
     jade.set("svg", svg);
 
     domready(function() {
+        var init_complete = false;
 
         if (config["css"]) {
             var style = $.new("style");
@@ -33,8 +34,9 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
         $("#isso-thread").append('<div id="isso-root"></div>');
 
         api.thread($("#isso-thread").getAttribute("data-isso-id")).then(function(rv){
-           websocket(rv);
+           websocket.init(rv, receiver_message);
         });
+
         api.fetch($("#isso-thread").getAttribute("data-isso-id"),
             config["max-comments-top"],
             config["max-comments-nested"]).then(
@@ -61,13 +63,30 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
                 if (window.location.hash.length > 1) {
                     $(window.location.hash).scrollIntoView();
                 }
+
             },
             function(err) {
                 console.log(err);
             }
         );
 
-
+        function receiver_message(message){
+            if(!init_complete) {
+                init_complete = true;
+                return;
+            }
+            switch (message.type){
+                case 'create':
+                    isso.insert(message.data, false);
+                    break;
+                case 'remove':
+                    isso.remove(message.data);
+                    break;
+                case 'modify':
+                    isso.modify(message.data);
+                    break;
+            }
+        }
 
     });
 });

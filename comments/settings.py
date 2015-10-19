@@ -1,6 +1,8 @@
 # Django settings for comments project.
 import os
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -47,7 +49,7 @@ USE_I18N = True
 USE_L10N = True
 
 # If you set this to False, Django will not use timezone-aware datetimes.
-USE_TZ = True
+USE_TZ = False
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
@@ -121,7 +123,7 @@ INSTALLED_APPS = (
     'ws4redis',
     'comments',
     # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
@@ -171,6 +173,7 @@ WEBSOCKET_URL = '/ws/'
 WS4REDIS_CONNECTION = REDIS_SETTING
 WS4REDIS_EXPIRE = 300
 
+
 CACHES = {
     'default':{
         'BACKEND': 'redis_cache.RedisCache',
@@ -190,3 +193,6 @@ SESSION_REDIS_HOST = REDIS_SETTING.get('host')
 SESSION_REDIS_PORT = REDIS_SETTING.get('port')
 SESSION_REDIS_DB = 1
 SESSION_REDIS_PASSWORD = REDIS_SETTING.get('password')
+
+
+KEYWORD_FILE_PATH = os.path.join(os.path.dirname(__file__), os.path.pardir, 'keywords').replace('\\','/')

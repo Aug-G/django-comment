@@ -1,9 +1,10 @@
 from django.conf.urls import patterns, include, url
 from django.views.generic import TemplateView
 from .views import CommentViewSet
+from django.contrib import admin
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
-# admin.autodiscover()
+admin.autodiscover()
 
 from rest_framework import routers
 
@@ -20,7 +21,9 @@ urlpatterns = patterns('',
     url(r'^$', CommentViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^new$', CommentViewSet.as_view({'post': 'create'})),
     url(r'^id/(?P<pk>\d+)$', CommentViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
-    url(r'^count$', CommentViewSet.as_view({'post': 'count'})),
+    url(r'^id/(?P<pk>\d+)/like$', CommentViewSet.as_view({'post': 'like'})),
+    url(r'^id/(?P<pk>\d+)/dislike$', CommentViewSet.as_view({'post': 'dislike'})),
+    url(r'^count$', CommentViewSet.as_view({'post': 'count', 'get': 'count'})),
     url(r'^thread$', CommentViewSet.as_view({'get': 'thread'})),
     url(r'^demo$', TemplateView.as_view(template_name='index.html')),
     url(r'^test$', TemplateView.as_view(template_name='test.html')),
@@ -28,5 +31,5 @@ urlpatterns = patterns('',
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    # url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', include(admin.site.urls)),
 )
